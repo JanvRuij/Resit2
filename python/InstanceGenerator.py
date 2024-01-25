@@ -83,9 +83,7 @@ class SSP:
             nr_large = np.count_nonzero(self.weights > 190)
             nr_small = np.count_nonzero(self.weights < 10)
             idx1 = min(nr_small // 5, 3)
-            print(idx1)
             idx2 = min(nr_large // 5, 3)
-            print(idx2)
             if np.random.random() < epsilon or Q[idx1][idx2][0] == Q[idx1][idx2][1]:
                 a = np.random.randint(0, 3)
             else:
@@ -94,6 +92,7 @@ class SSP:
             amount = (a + 1) * 60
             x, _ = self.greedy(amount)
             r = self.ILP_solver(x)
+            print(r)
 
             # Keep track of N
             N[idx1][idx2][a] += 1

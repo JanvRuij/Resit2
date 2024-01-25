@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.lib import diff
 
 
 class BabyYahtzee:
@@ -53,8 +52,8 @@ class BabyYahtzee:
         self.dices = np.sort(self.dices)
         diffrence = np.diff(self.dices)
 
-        # goign for a street with 3 of the same is not smart..
-        if np.sum(diffrence) == 0:
+        # not going for a street with three or two of the same
+        if np.sum(diffrence) <= 1:
             pass
         # if this is not the case we go for the streets!
         elif np.array_equal(diffrence, np.array([2, 1])):
@@ -62,28 +61,41 @@ class BabyYahtzee:
         elif np.array_equal(diffrence, np.array([1, 2])):
             self.throw_dices([2])
 
-        return self.get_score()
-
     # comboosss
     def greedy2(self):
         self.dices = np.sort(self.dices)
         diffrence = np.diff(self.dices)
 
         # 3 the same!
-        if np.sum(diffrence) == 0:
+        if np.sum(diffrence) <= 1:
             pass
         # first 2 are equal so rethrow last
         elif diffrence[0] == 0:
             self.throw_dices([2])
-        # last 2 are euqal
+        # last 2 are euqal so rethrow first
         elif diffrence[1] == 0:
             self.throw_dices([0])
 
 
 x = BabyYahtzee()
-for i in range(1):
+greedy1 = np.array([])
+greedy2 = np.array([])
+greedy3 = np.array([])
+for i in range(1000):
     x.new_game()
-    print(x.dices)
-    greedy1 = x.greedy1()
+    # do just looking for streets
+    x.greedy1()
+    greedy1 = np.append(greedy1, x.get_score())
     x.reset()
-    print(x.dices)
+    # look only for combinations
+    x.greedy2()
+    greedy2 = np.append(greedy2, x.get_score())
+    x.reset()
+    # look first for combinations and after that for streets
+    x.greedy2()
+    x.greedy1()
+    greedy3 = np.append(greedy3, x.get_score())
+
+print(f"Only combos: {np.average(greedy2)}")
+print(f"First combos then streets: {np.average(greedy3)}")
+print(f"Only streets: {np.average(greedy1)}")
