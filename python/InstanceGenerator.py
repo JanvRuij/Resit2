@@ -13,10 +13,10 @@ class SSP:
     def __init__(self, n, c):
         self.c = c
         self.n = n
-        self.weights = np.random.randint(1, 200, self.n)
+        self.weights = np.random.randint(1, 201, self.n)
 
     def reset(self):
-        self.weights = np.random.randint(1, 200, self.n)
+        self.weights = np.random.randint(1, 201, self.n)
 
     def greedy(self, limit):
         # U is copy of the weights, I keeps track of indecices used
@@ -71,19 +71,22 @@ class SSP:
         return model.ObjVal
 
     def Q_training(self):
-        x = 4
-        Q = [[[0.0 for _ in range(x)] for _ in range(x)] for _ in range(x)]
-        N = [[[0.0 for _ in range(x)] for _ in range(x)] for _ in range(x)]
-
-        for i in range(1000):
+        x = 3
+        Q = [[[0.0 for _ in range(5)] for _ in range(x)] for _ in range(x)]
+        N = [[[0.0 for _ in range(5)] for _ in range(x)] for _ in range(x)]
+        average_list = []
+        average_tracker = []
+        for i in range(100):
             if i % 10 == 0:
                 print("Trained instance", i)
+                average_list.append(sum(average_tracker)/10)
+                average_tracker = []
             self.reset()
 
             nr_large = np.count_nonzero(self.weights > 190)
             nr_small = np.count_nonzero(self.weights < 10)
-            idx1 = min(nr_small // 5, 3)
-            idx2 = min(nr_large // 5, 3)
+            idx1 = int(min(nr_small // 6.5, 2))
+            idx2 = int(min(nr_large // 6.5, 2))
             if np.random.random() < epsilon or Q[idx1][idx2][0] == Q[idx1][idx2][1]:
                 a = np.random.randint(0, 3)
             else:
@@ -100,6 +103,9 @@ class SSP:
 
             # Update the action value function
             Q[idx1][idx2][a] = Q[idx1][idx2][a] * (1 - alpha) + alpha * r
+            average_tracker.append(r)
+
+        print(average_list)
 
         return Q
 

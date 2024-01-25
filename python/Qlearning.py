@@ -1,4 +1,11 @@
 import numpy as np
+import tqdm
+
+
+# Q parameters
+gamma = 1
+alpha = 0.01
+epsilon = 0.1
 
 
 class BabyYahtzee:
@@ -19,6 +26,9 @@ class BabyYahtzee:
         self.penalty = 0
         self.dices = np.copy(self.dices_buffer)
 
+    def sort_dices(self):
+        self.dices = np.sort(self.dices)
+
     def get_score(self):
         # calculate the score based on streets or combos
         self.dices = np.sort(self.dices)
@@ -35,6 +45,8 @@ class BabyYahtzee:
         return score - self.penalty
 
     def throw_dices(self, indices):
+        if indices == []:
+            return
         # throw some dices and receive penalties
         amount = len(indices)
         for i in indices:
@@ -76,12 +88,77 @@ class BabyYahtzee:
         elif diffrence[1] == 0:
             self.throw_dices([0])
 
+    def Q_training(self):
+        global epsilon
+        actions_taken = []
+        new = 0
+        # 8 action in each state
+        action_space = [[0], [1], [2], [0, 1], [0, 2],
+                        [1, 2], [0, 1, 2], []]
+        Q = [[[[0.0 for _ in range(8)] for _ in range(6)] for _ in range(6)] for _ in range(6)]
+        N = [[[[1 for _ in range(8)] for _ in range(6)] for _ in range(6)] for _ in range(6)]
+        for _ in tqdm.tqdm((range(1000000))):
+            # calculate the current score
+            if actions_taken == []:
+                start = self.get_score()
+            else:
+                start = new
+            # substract one because computers count from 0
+            first = self.dices[0] - 1
+            second = self.dices[1] - 1
+            third = self.dices[2] - 1
+            if np.random.rand() < epsilon:
+                # choose random action
+                a = np.random.randint(0, 8)
+                # take the random action
+            else:
+                a = Q[first][second][third].index(max(Q[first][second][third]))
+
+            self.throw_dices(action_space[a])
+            new = self.get_score()
+            bonus = new - start
+            actions_taken.append([a, [first, second, third], bonus])
+            # if we are stopping, we start caclulating the reward for each stage
+            if a == 7:
+                # replay actions
+                for av in actions_taken:
+                    Q[av[1][0]][av[1][1]][av[1][2]][av[0]] = Q[av[1][0]][av[1][1]][av[1][2]][av[0]] * (1 - alpha) + alpha * av[2]
+                self.new_game()
+                actions_taken = []
+
+        print(Q[0][0][0])
+        print(Q[1][1][1])
+        print(Q[1][2][4])
+        return Q
+
+    def Q_testing(self):
+        action_space = [[0], [1], [2], [0, 1], [0, 2],
+                        [1, 2], [0, 1, 2], []]
+        a = 0
+        self.sort_dices()
+        for _ in range(100000):
+            print(self.dices)
+            # substract one because computers count from 0
+            self.sort_dices()
+            first = self.dices[0] - 1
+            second = self.dices[1] - 1
+            third = self.dices[2] - 1
+            a = Q[first][second][third].index(max(Q[first][second][third]))
+            print(f"Throw: {action_space[a]}")
+            print(self.dices)
+            self.throw_dices(action_space[a])
+            if a == 7:
+                print("done")
+                return
+
 
 x = BabyYahtzee()
 greedy1 = np.array([])
 greedy2 = np.array([])
 greedy3 = np.array([])
-for i in range(1000):
+Q_testing = np.array([])
+Q = x.Q_training()
+for i in range(100):
     x.new_game()
     # do just looking for streets
     x.greedy1()
@@ -95,7 +172,13 @@ for i in range(1000):
     x.greedy2()
     x.greedy1()
     greedy3 = np.append(greedy3, x.get_score())
+    x.reset()
+    x.Q_testing()
+    Q_testing = np.append(Q_testing, x.get_score())
+
+
 
 print(f"Only combos: {np.average(greedy2)}")
 print(f"First combos then streets: {np.average(greedy3)}")
 print(f"Only streets: {np.average(greedy1)}")
+print(f"Q testing: {np.average(Q_testing)}")
