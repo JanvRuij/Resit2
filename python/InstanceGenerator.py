@@ -48,8 +48,8 @@ class SSP:
     def ILP_solver(self, preassigned):
         # create the model
         model = gp.Model("ILP")
-        model.setParam("TimeLimit", 5)
         model.setParam("OutputFlag", 0)
+        model.setParam("TimeLimit", 5)
 
         # add vars
         x = model.addVars(self.n, self.n, vtype=GRB.BINARY, name="x")
@@ -71,7 +71,7 @@ class SSP:
         return model.ObjVal
 
     def Q_training(self):
-        x = 5
+        x = 4
         Q = [[[0.0 for _ in range(x)] for _ in range(x)] for _ in range(x)]
         N = [[[0.0 for _ in range(x)] for _ in range(x)] for _ in range(x)]
 
@@ -80,19 +80,20 @@ class SSP:
                 print("Trained instance", i)
             self.reset()
 
-            nr_large = np.count_nonzero(self.weights > 20)
-            nr_small = np.count_nonzero(self.weights < 20)
-            idx1 = min(nr_small // 5, 4)
-            idx2 = min(nr_large // 5, 4)
+            nr_large = np.count_nonzero(self.weights > 190)
+            nr_small = np.count_nonzero(self.weights < 10)
+            idx1 = min(nr_small // 5, 3)
+            print(idx1)
+            idx2 = min(nr_large // 5, 3)
+            print(idx2)
             if np.random.random() < epsilon or Q[idx1][idx2][0] == Q[idx1][idx2][1]:
-                a = np.random.randint(0, 4)
+                a = np.random.randint(0, 3)
             else:
                 a = Q[idx1][idx2].index(max(Q[idx1][idx2]))
 
-            amount = (a + 1) * 20
+            amount = (a + 1) * 60
             x, _ = self.greedy(amount)
             r = self.ILP_solver(x)
-            print(r)
 
             # Keep track of N
             N[idx1][idx2][a] += 1
@@ -110,3 +111,4 @@ x = SSP(200, 200)
 #ilp = x.ILP_solver(np.zeros((200, 200)))
 #print(f"ILP result: {ilp}")
 Q_result = x.Q_training()
+print(Q_result)
