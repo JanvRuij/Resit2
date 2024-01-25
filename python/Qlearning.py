@@ -96,7 +96,6 @@ class BabyYahtzee:
         action_space = [[0], [1], [2], [0, 1], [0, 2],
                         [1, 2], [0, 1, 2], []]
         Q = [[[[0.0 for _ in range(8)] for _ in range(6)] for _ in range(6)] for _ in range(6)]
-        N = [[[[1 for _ in range(8)] for _ in range(6)] for _ in range(6)] for _ in range(6)]
         for _ in tqdm.tqdm((range(1000000))):
             # calculate the current score
             if actions_taken == []:
@@ -126,9 +125,6 @@ class BabyYahtzee:
                 self.new_game()
                 actions_taken = []
 
-        print(Q[0][0][0])
-        print(Q[1][1][1])
-        print(Q[1][2][4])
         return Q
 
     def Q_testing(self):
@@ -175,7 +171,6 @@ for i in range(100):
     x.reset()
     x.Q_testing()
     Q_testing = np.append(Q_testing, x.get_score())
-
 
 
 print(f"Only combos: {np.average(greedy2)}")
