@@ -82,7 +82,7 @@ class SSP:
         idx1 = 0
         idx2 = 0
         quantiles = np.array([1.1, 0.75, 0.5, 0.25])
-        for i in tqdm.tqdm((range(500))):
+        for i in tqdm.tqdm((range(1000))):
             if i % 10 == 0:
                 print("Trained instance", i)
                 average_list.append(sum(average_tracker)/10)
@@ -101,7 +101,7 @@ class SSP:
                 if prob_small < value:
                     idx2 = index[0]
 
-            if np.random.random() < epsilon or Q[idx1][idx2][0] == Q[idx1][idx2][1]:
+            if np.random.random() < epsilon or Q[idx1][idx2][0] == Q[idx1][idx2][1] == Q[idx1][idx2][2] == Q[idx1][idx2][3]:
                 a = np.random.randint(0, 4)
             else:
                 a = Q[idx1][idx2].index(max(Q[idx1][idx2]))

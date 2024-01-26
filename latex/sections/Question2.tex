@@ -1,6 +1,6 @@
 \section*{Question 2}
 \subsection*{1}
-Take the following instance weights = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] and capacity = 13. The greedy algortitm would give the following solution:
+Take the following instance weights = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] and capacity = 13. The greedy algorithm would give the following solution:
 \begin{description}
 	\item S1 = 11 + 1 + 2
 	\item S2 = 10 + 3
@@ -23,3 +23,19 @@ To make the instance hard enough for gurobi to take atleast 5 seconds, the follo
 	\item Capacity: 200
 	\item Weights: Uniformly distributed intergers ranging from 1 to 200
 \end{description}
+\subsection*{3}
+The stopping criterion is the amount of items that we want to put in a subset. Since gurobi is able to outperform the greedy (with 5 seconds time limit), it seems logical that the stopping criterion should be met quite soon. Letting half of the work be done by the greedy algorithm will not give better results. The question is how much exactly. By keeping track of the number of large and small items, where large corresponds to greater than 150 and small means smaller than 50, we can create a Q table where each state correspond to the quarter percentile the numer of large/small items fall in (binomaly distributed). With quarter percentiles, there are 4 states the number of large items can be in and the same hold for the small items. This means there are $4 * 4 = 16$ states in total. In each state we can take an action which corresponds to the number of items to process in the greedy part. The amount chosen is $160 + a * 10$, where $a$ corresponds to the action taken (1, 2, 3 or 4), so four actions in total. For completely diffrent instances, the difrent types of actions could be found and the definition of a large or small item could be changed aswell. The alpha by which the reward is multiplied, corresponding to each action in each state can be found in equation \ref{eq:alpha}.
+\begin{equation}
+	\alpha = 1 / N_s^a
+	\label{eq:alpha}
+\end{equation}
+Here, $N_s^a$ corresponds to the number of times the action $a$ is taken in state $s$. This would imply that each the value in the Q tables will slowly converge to a limit. This implies that the actions with the highest reward should perform the best in each particular state. The Q table is initialized with zeros.
+\subsection*{4}
+The instances generated are completely similar to the ones described in question 2.
+\subsection*{5}
+Gamma is equal to 1, there is not a future reward to be taking into account. Alpha is slowly decreasing for each time an action is taken, as shown in question 2. Epsilon is set to 0.1, such that each action is tried atleast once.
+\subsection*{6}
+An overview of the average results obtained by both the greedy, ILP solver and Hyper heuristic can be found in table \ref{tab:hyper} in the appendix. The average is calculated over 100 instances, the hyper-heuristic does give a small performance increase of the ILP, increasing the training time could bring better results.
+\subsection*{7}
+The agent prefers to apply the greedy to 30-20 items in most states, however, when there are many large items and a small amount of small items, it seems to prefer only 10 items decided by the greedy. This seems logical, since it is harder to make a perferct fit when there are many large items and not so much small items. The overall benifit this hyper-heuristic has that it is able to bring a performance boost to the ILP-solver when applied correctly and because the greedy algorithm is so fast (especially for only 10 items), it does not really affect the total execution time.
+
