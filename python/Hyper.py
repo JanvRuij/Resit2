@@ -1,6 +1,9 @@
 import numpy as np
+from scipy.optimize import quadratic_assignment
+import tqdm
 import gurobipy as gp
-from gurobipy import GRB
+from gurobipy import GRB, QuadExpr
+from scipy.stats import binom
 
 
 # Q parameters
@@ -34,7 +37,7 @@ class SSP:
                 if np.count_nonzero(I) <= limit:
                     break
                 max = np.argmax(U * I)
-            for index, weight in np.ndenumerate(U):
+            for index, weight in np.ndenumerate(np.sort(U)):
                 if I[index] == 1:
                     if np.sum(s) + weight >= self.c:
                         s = np.append(s, weight)
@@ -71,31 +74,41 @@ class SSP:
         return model.ObjVal
 
     def Q_training(self):
-        x = 3
-        Q = [[[0.0 for _ in range(5)] for _ in range(x)] for _ in range(x)]
-        N = [[[0.0 for _ in range(5)] for _ in range(x)] for _ in range(x)]
+        x = 4
+        Q = [[[0.0 for _ in range(x)] for _ in range(x)] for _ in range(x)]
+        N = [[[0.0 for _ in range(x)] for _ in range(x)] for _ in range(x)]
         average_list = []
         average_tracker = []
-        for i in range(10):
+        idx1 = 0
+        idx2 = 0
+        quantiles = np.array([1.1, 0.75, 0.5, 0.25])
+        for i in tqdm.tqdm((range(500))):
             if i % 10 == 0:
                 print("Trained instance", i)
                 average_list.append(sum(average_tracker)/10)
                 average_tracker = []
+
             self.reset()
 
-            nr_large = np.count_nonzero(self.weights > 190)
-            nr_small = np.count_nonzero(self.weights < 10)
-            idx1 = int(min(nr_small // 6.5, 2))
-            idx2 = int(min(nr_large // 6.5, 2))
+            nr_large = np.count_nonzero(self.weights > 150)
+            nr_small = np.count_nonzero(self.weights < 50)
+
+            prob_large = binom.cdf(nr_large, 200, 0.25)
+            prob_small = binom.cdf(nr_small, 200, 0.25)
+            for index, value in np.ndenumerate(quantiles):
+                if prob_large < value:
+                    idx1 = index[0]
+                if prob_small < value:
+                    idx2 = index[0]
+
             if np.random.random() < epsilon or Q[idx1][idx2][0] == Q[idx1][idx2][1]:
-                a = np.random.randint(0, 3)
+                a = np.random.randint(0, 4)
             else:
                 a = Q[idx1][idx2].index(max(Q[idx1][idx2]))
 
-            amount = (a + 1) * 60
+            amount = 160 + a * 10
             x, _ = self.greedy(amount)
             r = self.ILP_solver(x)
-            print(r)
 
             # Keep track of N
             N[idx1][idx2][a] += 1
@@ -105,34 +118,37 @@ class SSP:
             Q[idx1][idx2][a] = Q[idx1][idx2][a] * (1 - alpha) + alpha * r
             average_tracker.append(r)
 
-        print(average_list)
+        print("average_tracker")
+        print(average_tracker)
 
         return Q
 
     def Q_testing(self):
+        quantiles = np.array([1.1, 0.75, 0.5, 0.25])
         nr_large = np.count_nonzero(self.weights > 190)
         nr_small = np.count_nonzero(self.weights < 10)
-        idx1 = int(min(nr_small // 6.5, 2))
-        idx2 = int(min(nr_large // 6.5, 2))
+        prob_large = binom.cdf(nr_large, 200, 0.25)
+        prob_small = binom.cdf(nr_small, 200, 0.25)
+        for index, value in np.ndenumerate(quantiles):
+            if prob_large < value:
+                idx1 = index[0]
+            if prob_small < value:
+                idx2 = index[0]
 
         a = Q[idx1][idx2].index(max(Q[idx1][idx2]))
-        amount = (a + 1) * 60
+        amount = 160 + a * 10
         x, _ = self.greedy(amount)
         return self.ILP_solver(x)
 
 
 x = SSP(200, 200)
-# greedyx, result = x.greedy(0)
-#print(f"Greedy result: {result}")
-#ilp = x.ILP_solver(np.zeros((200, 200)))
-#print(f"ILP result: {ilp}")
-Q= x.Q_training()
-
+Q = x.Q_training()
+print(Q)
 greedy = np.array([])
 ILP = np.array([])
 Q_testing = np.array([])
 
-for i in range(10):
+for i in range(100):
     x.reset()
     _, g_val = x.greedy(0)
     greedy = np.append(greedy, g_val)

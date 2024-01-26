@@ -1,0 +1,23 @@
+\section*{Question 1}
+\subsection*{1}
+The first greedy strategy is to go for streets whenever the odds seem adequete. An overview of this algorithm can be find in the appendix at algorithm \ref{algo:streets}. The second greedy algorithm is to go for combinations of three when there are two of the same dices. An overview of this algorithm can be found in the appendix at algorithm \ref{algo:combinations}. The final algorithm consist of both the combination algorithm and the streets algorithm, by applying them both in that particular order. Important to note is that the dices are always sorted from low to high. 
+\subsection*{2}
+In this game there are $6 * 6 * 6 = 216$ possible states the game can be in and in each state the same list of 8 actions is available:
+\begin{description}
+	\item Throw first dice
+	\item Throw second dice
+	\item Throw last dice
+	\item Throw first and second dice
+	\item Throw first and last dice
+	\item Throw second and last dice
+	\item Throw all three dices
+	\item Throw no dice (stop the game)
+\end{description}
+A Q table is produces with 216 states and initialized with 8 zero's (one for each action). The reward for each action is equal to the change that is created after the action. So if the actions leads to an improvement the reward is positive and vice versa. This also means that the last action (doing nothing) results in a reward of 0.
+\subsection*{3}
+Because each throw is independed of that what has happend before, gamma is set to one, so future rewards are just as important as rewards in the beginning of the game. For alpha, a relatively low value has to be chosen for proper learning (0.01 in this case), this is due to to fact that we are dealing with a game where the statistical average of a decicion is very importan. If alpha would be set to a high value, we might just end up with a Q table with values that are only high by change, not because they are consitantly outperforming the other options. Epsilon is set to 0.1, the algorithm should try new actions from time to time, but overall it is able to find the most suitable action, even when epsilon is very close to 0. This is due to the fact that the starting values are equal to 0, so taking wrong decicions will lead to negative values in the Q table, therefore the actions with a reward of 0 associated, will eventually be chosen.
+\subsection*{4}
+After applying the greedy algorithms and letting the Q learning algorithm learn over 100.000 throws. The Q learning is able to outperform all of the greedy stategies. An overview of the results can be found in table \ref{tab:average_values}.
+\subsection*{5}
+The agent goes for streets whenever there are two dices with a difference of one and there are no combinations between dices. Whenever there are no combinations and no options for streets, it rethrows the highest and lowest number, so with dices [1, 4, 6], the first and last dice are thrown. This seems to be very a good option because it is able to get a streets afterwards in the example found. When there is a combination of two dices it throws for the third equal dice.
+

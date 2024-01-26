@@ -1,0 +1,25 @@
+\section*{Question 2}
+\subsection*{1}
+Take the following instance weights = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] and capacity = 13. The greedy algortitm would give the following solution:
+\begin{description}
+	\item S1 = 11 + 1 + 2
+	\item S2 = 10 + 3
+	\item S3 = 9 + 4 + 5
+	\item S4 = 8 + 6
+	\item S5 = 7 < 13
+\end{description}
+Which has a value of four in total. This is not optimal, since a value of five can be achieved in the following manner:
+\begin{description}
+	\item S1 = 11 + 2
+	\item S2 = 10 + 3
+	\item S3 = 9 + 4
+	\item S4 = 8 + 5
+	\item S5 = 6 + 1 + 7
+\end{description}
+\subsection*{2}
+To make the instance hard enough for gurobi to take atleast 5 seconds, the following instances are generated:
+\begin{description}
+	\item Number of items: 200
+	\item Capacity: 200
+	\item Weights: Uniformly distributed intergers ranging from 1 to 200
+\end{description}

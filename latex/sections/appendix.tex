@@ -1,0 +1,47 @@
+\appendix
+\section*{Algorithms}
+ \begin{algorithm}[ht]
+\SetAlgoLined
+\KwData{ $D_i \quad i = 1, 2, 3 \quad C_j = [D_2 - D_1 , D_2 - D_3]$}
+\If{$\sum_{j = 1}^2 C_j <= 1$}{
+	Do nothing. We have combinations.
+}
+\ElseIf{$C  = [2, 1]$}{
+		Rethrow first dice}
+\ElseIf { $C = [1,2]$}{
+		Rethrow last dice}
+\label{algo:streets}
+ \caption{Greedy steets Algorithm}
+\end{algorithm}
+
+
+ \begin{algorithm}[ht]
+\SetAlgoLined
+\KwData{ $D_i \quad i = 1, 2, 3 \quad C_j = [Dice_2 - Dice_1 , Dice_2 - Dice_3]$}
+\If{$\sum_{j = 1}^2 C_j <= 1$}{
+	Do nothing. We have combinations.
+}
+\ElseIf{$C[0]  = 0$}{
+		Rethrow last dice}
+\ElseIf { $C[1] = [0]$}{
+		Rethrow first dice}
+\label{algo:combinations}
+ \caption{Greedy Combinations Algorithm}
+\end{algorithm}
+
+\section*{Tables}
+\begin{table}
+    \centering
+    \begin{tabular}{|l|c|}
+        \hline
+        \textbf{Algorithm} & \textbf{Average Value} \\
+        \hline
+        Only combos & 22.61 \\
+        First combos then streets & 25.7 \\
+        Only streets & 24.44 \\
+        Q testing & 34.92 \\
+        \hline
+    \end{tabular}
+    \caption{Average Values for Different Scenarios}
+    \label{tab:average_values}
+\end{table}
